@@ -1,0 +1,6 @@
+# Windows download metadata
+*Zone.Identifier*
+
+# Local build output
+/builds/
+/out/

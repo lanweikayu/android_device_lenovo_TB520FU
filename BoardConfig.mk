@@ -1,0 +1,210 @@
+#
+# Copyright (C) 2024 The Android Open Source Project
+# Copyright (C) 2024 The TWRP Open Source Project
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+DEVICE_PATH := device/lenovo/TB520FU
+
+# For building with minimal manifest
+ALLOW_MISSING_DEPENDENCIES := true
+
+
+# Architecture
+TARGET_ARCH := arm64
+TARGET_ARCH_VARIANT := armv8-2a
+TARGET_CPU_ABI := arm64-v8a
+TARGET_CPU_ABI2 := 
+TARGET_CPU_VARIANT := generic
+TARGET_CPU_VARIANT_RUNTIME := kryo385
+
+ENABLE_CPUSETS := true
+ENABLE_SCHEDBOOST := true
+
+# Bootloader
+BOARD_VENDOR := lenovo
+TARGET_SOC := pineapple
+TARGET_BOOTLOADER_BOARD_NAME := pineapple
+TARGET_NO_BOOTLOADER := true
+TARGET_NO_RADIOIMAGE := true
+TARGET_USES_UEFI := true
+
+# Display
+TARGET_SCREEN_DENSITY := 400
+TARGET_USES_VULKAN := true
+
+# Kernel
+BOARD_BOOTIMG_HEADER_VERSION := 4
+BOARD_KERNEL_BASE := 0x00000000
+BOARD_KERNEL_CMDLINE := 
+BOARD_KERNEL_PAGESIZE := 4096
+#BOARD_RAMDISK_OFFSET := 0x02000000
+#BOARD_KERNEL_TAGS_OFFSET := 0x01e00000
+BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOTIMG_HEADER_VERSION)
+#BOARD_MKBOOTIMG_ARGS += --ramdisk_offset $(BOARD_RAMDISK_OFFSET)
+
+BOARD_KERNEL_IMAGE_NAME := Image
+BOARD_RAMDISK_USE_LZ4 := true
+# recovery.img of Y700 2025 doesn't contain a kernel. The kernel is extracted from boot.img.
+BOARD_EXCLUDE_KERNEL_FROM_RECOVERY_IMAGE := true
+
+# prebuilt
+#TARGET_FORCE_PREBUILT_KERNEL := true
+#ifeq ($(TARGET_FORCE_PREBUILT_KERNEL),true)
+#TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/Image
+#TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb
+#BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilt/dtbo
+#BOARD_MKBOOTIMG_ARGS += --dtb $(TARGET_PREBUILT_DTB)
+#BOARD_INCLUDE_DTB_IN_BOOTIMG := 
+#BOARD_KERNEL_SEPARATED_DTBO := 
+#BOARD_INCLUDE_RECOVERY_DTBO := true
+#TARGET_KERNEL_ARCH := arm64
+#endif
+
+# Partitions
+BOARD_FLASH_BLOCK_SIZE := 262144
+BOARD_BOOTIMAGE_PARTITION_SIZE := 100663296
+BOARD_RECOVERYIMAGE_PARTITION_SIZE := 104857600
+BOARD_HAS_LARGE_FILESYSTEM := true
+BOARD_SYSTEMIMAGE_PARTITION_TYPE := ext4
+BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
+BOARD_SUPER_PARTITION_SIZE := 13958643712
+BOARD_SUPER_PARTITION_GROUPS := qti_dynamic_partitions
+BOARD_QTI_DYNAMIC_PARTITIONS_PARTITION_LIST := system odm product system_ext vendor vendor_dlkm
+BOARD_QTI_DYNAMIC_PARTITIONS_SIZE := 13954449408
+
+# System as root
+BOARD_ROOT_EXTRA_FOLDERS := \
+	cache \
+	carrier \
+	data_mirror \
+	efs \
+	linkerconfig \
+	odm_dlkm \
+	oem \
+	optics \
+	postinstall \
+	prism \
+	second_stage_resources \
+	spu \
+	system_ext \
+	vendor_dlkm
+BOARD_SUPPRESS_SECURE_ERASE := true
+
+# Workaround for error copying vendor files to recovery ramdisk
+BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := erofs
+TARGET_COPY_OUT_VENDOR := vendor
+
+
+# Platform
+BOARD_USES_QCOM_HARDWARE := true
+TARGET_BOARD_PLATFORM := pineapple
+TARGET_BOARD_PLATFORM_GPU := qcom-adreno750
+QCOM_BOARD_PLATFORMS += pineapple
+
+# Recovery
+#BOARD_INCLUDE_RECOVERY_DTBO := false
+TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
+TARGET_USERIMAGES_USE_EXT4 := true
+TARGET_USERIMAGES_USE_F2FS := true
+BOARD_HAS_LARGE_FILESYSTEM := true
+BOARD_HAS_NO_SELECT_BUTTON := true
+RECOVERY_SDCARD_ON_DATA := true
+
+# Verified Boot
+BOARD_AVB_ENABLE := true
+BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3
+BOARD_AVB_RECOVERY_KEY_PATH := external/avb/test/data/testkey_rsa4096.pem
+BOARD_AVB_RECOVERY_ALGORITHM := SHA256_RSA4096
+BOARD_AVB_RECOVERY_ROLLBACK_INDEX := 1
+BOARD_AVB_RECOVERY_ROLLBACK_INDEX_LOCATION := 1
+
+# RTC FIX QCOM
+TARGET_RECOVERY_QCOM_RTC_FIX := true
+
+# Crypto
+PLATFORM_SECURITY_PATCH := 2099-12-31
+VENDOR_SECURITY_PATCH := 2099-12-31
+PLATFORM_VERSION := 99
+PLATFORM_VERSION_LAST_STABLE := $(PLATFORM_VERSION)
+TW_INCLUDE_CRYPTO := true
+TW_INCLUDE_CRYPTO_FBE := true
+BOARD_USES_QCOM_FBE_DECRYPTION := true
+TW_INCLUDE_FBE_METADATA_DECRYPT := true
+BOARD_USES_METADATA_PARTITION := true
+
+# TWRP specific build flags
+# Landscape is the default; export USE_PORTRAIT=true for the portrait variant.
+ifneq ($(USE_PORTRAIT),true)
+    TW_THEME := landscape_hdpi
+    TW_ROTATION := 0
+    RECOVERY_TOUCHSCREEN_SWAP_XY := true
+    RECOVERY_TOUCHSCREEN_FLIP_X := false
+    RECOVERY_TOUCHSCREEN_FLIP_Y := true
+else
+    TW_THEME := portrait_hdpi
+    TW_ROTATION := 90
+    RECOVERY_TOUCHSCREEN_SWAP_XY := false
+    RECOVERY_TOUCHSCREEN_FLIP_X := true
+    RECOVERY_TOUCHSCREEN_FLIP_Y := true
+endif
+TW_DEVICE_VERSION := TB520FU
+TW_FRAMERATE := 60
+#TW_MAX_BRIGHTNESS := 510
+TW_DEFAULT_BRIGHTNESS := 500
+TW_BRIGHTNESS_PATH := "/sys/class/backlight/panel0-backlight/brightness"
+TW_CUSTOM_CPU_TEMP_PATH := /sys/class/thermal/thermal_zone50/temp
+TW_SCREEN_BLANK_ON_BOOT := true
+TW_EXCLUDE_APEX := true
+TW_EXCLUDE_DEFAULT_USB_INIT := true
+TW_INCLUDE_NTFS_3G := true
+TW_INCLUDE_7ZA := true
+TW_NO_HAPTICS := true
+TW_NO_NETWORK := true
+TW_USE_NEW_MINADBD := true
+TW_INPUT_BLACKLIST := "hbtp_vm"
+TW_EXCLUDE_DEFAULT_USB_INIT := true
+TW_USE_TOOLBOX := true
+TARGET_USES_MKE2FS := true
+TW_NO_LEGACY_PROPS := true
+TW_NO_BIND_SYSTEM := true
+TW_USE_MODEL_HARDWARE_ID_FOR_DEVICE_ID := true
+TW_EXTRA_LANGUAGES := true
+TW_BACKUP_EXCLUSIONS := /data/fonts
+TW_INCLUDE_REPACKTOOLS := true
+TW_INCLUDE_LIBRESETPROP := true
+TW_INCLUDE_RESETPROP := true
+TWRP_EVENT_LOGGING := true
+TWRP_INCLUDE_LOGCAT := true
+TARGET_USES_LOGD := true
+TW_INCLUDE_LPDUMP := true
+TW_INCLUDE_LPTOOLS := true
+
+# ZIP64 >4GB unzip fix
+#
+# The stock `unzip` in recovery is ziptool (system/libziparchive); its
+# `unzip -p` allocates the whole uncompressed entry in RAM before writing it
+# out, so ZIP64 entries larger than available memory abort with bad_alloc / OOM
+# and the piped output is truncated.
+#
+# 7za streams ZIP64 entries with a small constant memory footprint.  Stage the
+# wrapper in recovery/root/system/bin/unzip7za and install it as
+# /system/bin/unzip after the recovery ramdisk tree has been assembled (the
+# recovery/root copy would otherwise be shadowed by the ziptool `unzip`
+# symlink).  TARGET_RECOVERY_ROOT_OUT is not defined yet in BoardConfig, so use
+# PRODUCT_OUT + the fixed "recovery" copy directory.
+BOARD_RECOVERY_IMAGE_PREPARE += \
+    rm -f $(PRODUCT_OUT)/recovery/root/system/bin/unzip && \
+    cp $(TARGET_DEVICE_DIR)/recovery/root/system/bin/unzip7za $(PRODUCT_OUT)/recovery/root/system/bin/unzip && \
+    chmod 0755 $(PRODUCT_OUT)/recovery/root/system/bin/unzip
+TW_LOAD_VENDOR_MODULES := "qcom_pil_info.ko qmi_helpers.ko qcom_smd.ko qcom_glink.ko qcom_glink_smem.ko rproc_qcom_common.ko qcom_sysmon.ko qcom_q6v5.ko qcom_ramdump.ko qcom_q6v5_pas.ko snd_event_dlkm.ko pdr_interface.ko q6_pdr_dlkm.ko q6_notifier_dlkm.ko gpr_dlkm.ko spf_core_dlkm.ko adsp_loader_dlkm.ko"
+TW_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
+TW_HAS_EDL_MODE := true
+
+# Statusbar icons flags
+TW_STATUS_ICONS_ALIGN := center
+TW_CUSTOM_CPU_POS := 580
+TW_CUSTOM_CLOCK_POS := 50
+TW_CUSTOM_BATTERY_POS := 800
+# End*
