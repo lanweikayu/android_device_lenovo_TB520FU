@@ -1,0 +1,32 @@
+#!/system/bin/sh
+#
+# Wrapper around the real mkfs.f2fs used by TWRP when formatting /data.
+#
+# The TB520FU userdata partition uses metadata encryption (dm-default-key).
+# When TWRP has already decrypted /data during this boot, the mapper device
+# /dev/block/mapper/userdata still claims the raw block device, so mkfs.f2fs
+# cannot open it with O_EXCL and aborts with "Error: In use by the system!".
+#
+# Remove the stale mapper before handing over to the real binary.  The
+# mapping is recreated by the ROM (vold) on the next normal boot.
+
+if [ -e /dev/block/mapper/userdata ]; then
+	if [ ! -x /system/bin/dmctl ]; then
+		echo "make_f2fs: dmctl is missing, cannot remove userdata mapping" >&2
+		exit 1
+	fi
+
+	tries=0
+	while [ -e /dev/block/mapper/userdata ] && [ "$tries" -lt 20 ]; do
+		/system/bin/dmctl delete userdata >/dev/null 2>&1
+		tries=$((tries + 1))
+		[ -e /dev/block/mapper/userdata ] && sleep 0.1
+	done
+
+	if [ -e /dev/block/mapper/userdata ]; then
+		echo "make_f2fs: unable to remove the userdata dm mapping" >&2
+		exit 1
+	fi
+fi
+
+exec /system/bin/make_f2fs.real "$@"

@@ -19,6 +19,11 @@ PRODUCT_PACKAGES += \
     android.hardware.fastboot@1.0-impl-mock \
     fastbootd
 
+# dmctl is used by the make_f2fs wrapper to drop the stale metadata-encryption
+# mapping before /data is formatted.
+RECOVERY_BINARY_SOURCE_FILES += \
+    $(TARGET_OUT_EXECUTABLES)/dmctl
+
 # Dependencies
 TARGET_RECOVERY_DEVICE_MODULES += \
     libion \

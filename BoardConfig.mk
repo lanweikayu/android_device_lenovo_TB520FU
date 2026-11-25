@@ -194,10 +194,21 @@ TW_INCLUDE_LPTOOLS := true
 # recovery/root copy would otherwise be shadowed by the ziptool `unzip`
 # symlink).  TARGET_RECOVERY_ROOT_OUT is not defined yet in BoardConfig, so use
 # PRODUCT_OUT + the fixed "recovery" copy directory.
+#
+# /data is metadata-encrypted (dm-default-key).  TWRP formats the raw userdata
+# block device, but the dm mapping created when /data was decrypted earlier in
+# the boot keeps that device busy, so mkfs.f2fs fails with
+# "Error: In use by the system!".  Install a make_f2fs wrapper (see
+# recovery/root/system/bin/make_f2fs_twrp) that drops the stale mapping with
+# dmctl before running the real binary.  Copy the real tool from the system
+# staging directory so the prepare step stays idempotent across rebuilds.
 BOARD_RECOVERY_IMAGE_PREPARE += \
     rm -f $(PRODUCT_OUT)/recovery/root/system/bin/unzip && \
     cp $(TARGET_DEVICE_DIR)/recovery/root/system/bin/unzip7za $(PRODUCT_OUT)/recovery/root/system/bin/unzip && \
-    chmod 0755 $(PRODUCT_OUT)/recovery/root/system/bin/unzip
+    chmod 0755 $(PRODUCT_OUT)/recovery/root/system/bin/unzip && \
+    cp $(PRODUCT_OUT)/system/bin/make_f2fs $(PRODUCT_OUT)/recovery/root/system/bin/make_f2fs.real && \
+    cp $(TARGET_DEVICE_DIR)/recovery/root/system/bin/make_f2fs_twrp $(PRODUCT_OUT)/recovery/root/system/bin/make_f2fs && \
+    chmod 0755 $(PRODUCT_OUT)/recovery/root/system/bin/make_f2fs.real $(PRODUCT_OUT)/recovery/root/system/bin/make_f2fs
 TW_LOAD_VENDOR_MODULES := "qcom_pil_info.ko qmi_helpers.ko qcom_smd.ko qcom_glink.ko qcom_glink_smem.ko rproc_qcom_common.ko qcom_sysmon.ko qcom_q6v5.ko qcom_ramdump.ko qcom_q6v5_pas.ko snd_event_dlkm.ko pdr_interface.ko q6_pdr_dlkm.ko q6_notifier_dlkm.ko gpr_dlkm.ko spf_core_dlkm.ko adsp_loader_dlkm.ko"
 TW_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
 TW_HAS_EDL_MODE := true
